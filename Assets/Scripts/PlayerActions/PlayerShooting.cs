@@ -9,6 +9,7 @@ public class PlayerShooting : MonoBehaviour
     [SerializeField] private ParticleSystem _crosshair;
     [Space]
     [Range(0, 30)] [SerializeField] private float _maxDistance;
+    [SerializeField] private float _rotationSpeed;
 
     private PlayerInputHandler _inputHandler;
     private Vector2 _mouseScreenPosition;
@@ -30,7 +31,7 @@ public class PlayerShooting : MonoBehaviour
     {
         _aimDirection = _camera.ScreenPointToRay(mousePosition);
 
-        if (Physics.Raycast(_aimDirection, out RaycastHit hit, _maxDistance, _aimMask))
+        if (Physics.Raycast(_aimDirection, out RaycastHit hit, _maxDistance, _aimMask) && Time.timeScale > 0)
         {
             _crosshair.gameObject.SetActive(true);
             _crosshair.transform.position = hit.point;
@@ -44,8 +45,13 @@ public class PlayerShooting : MonoBehaviour
 
     public void Shoot()
     {
-        if (Physics.Raycast(_aimDirection, out RaycastHit hit, _maxDistance, _aimMask))
+        if (Physics.Raycast(_aimDirection, out RaycastHit hit, _maxDistance, _aimMask) && Time.timeScale > 0)
             if (hit.collider.TryGetComponent(out Enemy enemy))
+            {
+                transform.LookAt(enemy.transform);
+                transform.eulerAngles = new Vector3(0, transform.eulerAngles.y, 0);
+
                 enemy.GetDamage();
+            }
     }
 }

@@ -10,6 +10,7 @@ using UnityEngine.Events;
 public class Enemy : MonoBehaviour
 {
     [SerializeField] private ParticleSystem _particles;
+    [SerializeField] private MeshRenderer[] _renderers;
     [Space]
     [SerializeField] private float _speed;
     [SerializeField] private int _health;
@@ -18,8 +19,7 @@ public class Enemy : MonoBehaviour
     private Rigidbody _rigidbody;
     private Transform _target;
     private Vector3 _targetDirection;
-    private MeshRenderer _renderer;
-    private ScoreDisplay _scoreDisplay;
+    private MoneyDisplay _scoreDisplay;
     private AudioSource _audioSource;
     private SphereCollider _collider;
 
@@ -28,11 +28,10 @@ public class Enemy : MonoBehaviour
     private void Awake()
     {
         _rigidbody = GetComponent<Rigidbody>();
-        _renderer = GetComponent<MeshRenderer>();
         _collider = GetComponent<SphereCollider>();
         _audioSource = GetComponent<AudioSource>();
-        _target = FindObjectOfType<PlayerInputHandler>().transform;
-        _scoreDisplay = FindObjectOfType<ScoreDisplay>();
+        _target = FindObjectOfType<PlayerTarget>().transform;
+        _scoreDisplay = FindObjectOfType<MoneyDisplay>();
     }
 
     private void FixedUpdate()
@@ -40,6 +39,8 @@ public class Enemy : MonoBehaviour
         _targetDirection = _target.position - transform.position;
 
         _rigidbody.AddForce(_speed * _targetDirection, ForceMode.VelocityChange);
+
+        transform.LookAt(_target);
     }
 
     public void GetDamage()
@@ -58,7 +59,7 @@ public class Enemy : MonoBehaviour
     private IEnumerator StartDying()
     {
         Disable();
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(.6f);
 
         Enable();
         yield return null;
@@ -66,17 +67,22 @@ public class Enemy : MonoBehaviour
 
     private void Disable()
     {
+        foreach (var renderer in _renderers)
+            renderer.enabled = false;
+
+        _collider.enabled = false;
+
         _particles.Play();
         _audioSource.PlayOneShot(_audioClip);
-
-        _renderer.enabled = false;
-        _collider.enabled = false;
     }
 
     private void Enable()
     {
         gameObject.SetActive(false);
-        _renderer.enabled = true;
+
+        foreach (var renderer in _renderers)
+            renderer.enabled = true;
+
         _collider.enabled = true;
 
         Died?.Invoke();

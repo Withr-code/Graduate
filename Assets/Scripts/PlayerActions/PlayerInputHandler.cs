@@ -7,6 +7,7 @@
 public class PlayerInputHandler : MonoBehaviour
 {
     [SerializeField] private MenuPanel _menuPanel;
+    [SerializeField] private ShopPanel _shopPanel;
 
     private PlayerShooting _shooting;
 
@@ -19,9 +20,9 @@ public class PlayerInputHandler : MonoBehaviour
         _shooting = GetComponent<PlayerShooting>();
 
         Input.Player.Shoot.performed += ctx => _shooting.Shoot();
-        Input.UI.OpenMenu.started += ctx => _menuPanel.OnOpenMenu();
 
-        Input.UI.Continue.performed += ctx => _menuPanel.Continue();
+        Input.UI.OpenMenu.started += ctx => _menuPanel.OnOpenMenu();
+        Input.UI.Continue.started += ctx => _menuPanel.Continue();
         Input.UI.Quit.performed += ctx => _menuPanel.Quit();
 
         Cursor.visible = true;
